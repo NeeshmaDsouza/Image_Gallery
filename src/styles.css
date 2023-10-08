@@ -213,3 +213,7 @@ input.textbox {
   0% {filter: grayscale(0%);}
   100% {filter: grayscale(100%);}
 }
+
+.inputWarning {
+  border: 1px #e41111 solid;
+}
