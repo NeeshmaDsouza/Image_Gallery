@@ -12,7 +12,7 @@ export function Home() {
   const [searchPhrase, setSearchPhrase] = React.useState("");
   const [imageList, setImageList] = React.useState(
     [
-      /*
+     // /*
       {
         id: uuid(),
         title: "River",
@@ -67,7 +67,7 @@ export function Home() {
         imgURL:
           "https://images.pexels.com/photos/4558718/pexels-photo-4558718.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
       }
-      */
+      //*/
     ]
  );
 
@@ -78,8 +78,8 @@ export function Home() {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 400,
-    height: 500,
+    width: 500,
+    height: 600,
     bgcolor: "background.paper",
     border: "2px solid #000",
     boxShadow: 24,
@@ -88,8 +88,9 @@ export function Home() {
 
   async function addImage(newImage) {
     try {
-      let imageId = await addFireStoreDocument('imageList', newImage);
-      newImage.id = imageId;
+      // let imageId = await addFireStoreDocument('imageList', newImage);
+      // newImage.id = imageId;
+      newImage.id = uuid();
       setImageList([...imageList, newImage]);
     } catch (err) {
       console.log('Error in addImage', err);
@@ -108,7 +109,7 @@ export function Home() {
     .catch((err) => {
       console.log('Error in reading data', err)
     })
-  })
+  }, []);
 
   return (
     <div className="homeContainer">

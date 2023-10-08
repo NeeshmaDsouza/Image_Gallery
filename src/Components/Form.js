@@ -2,6 +2,7 @@ import * as React from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { uploadFile } from "../utils/firebase";
+import UploadIcon from '@mui/icons-material/Upload';
 
 export function Form({ handleClose, addImage }) {
   let [formDetails, setFormDetails] = React.useState({
@@ -11,8 +12,10 @@ export function Form({ handleClose, addImage }) {
     size: "",
     animation: ""
   });
+  const nonMandatoryFields = ['imgURL'];
 
   const handleChange = (event) => {
+    setInvalidFields([]);
     setFormDetails({ ...formDetails, [event.target.name]: event.target.value });
   };
   let [imageFile, setImageFile] = React.useState('');
@@ -20,12 +23,24 @@ export function Form({ handleClose, addImage }) {
     setImageFile(event.target.files[0])
   };
 
+  let [invalidFields, setInvalidFields] = React.useState([]);
+
   async function saveForm() {
     try {
-      if(imageFile) {
-        const downloadUrl = await uploadFile(`imageFileList/${Date.now()}${imageFile.name}`, imageFile);
-        formDetails.imgURL = downloadUrl;
+      let invalidFieldList = [];
+      for(let inputField in formDetails) {
+        if(formDetails[inputField] == '') {
+          invalidFieldList.push(inputField);
+        }
       }
+      setInvalidFields([...new Set([...invalidFields, ...invalidFieldList])]);
+      if(invalidFieldList.length>0) {
+        return false;
+      }
+      // if(imageFile) {
+      //   const downloadUrl = await uploadFile(`imageFileList/${Date.now()}${imageFile.name}`, imageFile);
+      //   formDetails.imgURL = downloadUrl;
+      // }
       await addImage(formDetails);
       clearForm();
     } catch(err) {
@@ -49,27 +64,35 @@ export function Form({ handleClose, addImage }) {
       <div className="formContainer">
         <div className="inputContainer">
           <label>Enter Image URL</label>
-          <input
-            name="imgURL"
-            type="text"
-            onChange={handleChange}
-            value={formDetails.imgURL}
-            className="textbox"
-          ></input>
-          <input
-            type="file"
-            onChange={handleUplaod}
-          ></input>
+          <div>
+            <input
+              style={{ width: "220px" }}
+              name="imgURL"
+              type="text"
+              onChange={handleChange}
+              value={formDetails.imgURL}
+              className={`textbox ${invalidFields.includes('imgURL') ? 'inputWarning' : ''}`}
+              ></input>
+            <input
+              type="file"
+              id="upload-file"
+              style={{ display: "none" }}
+              onChange={handleUplaod}
+            >
+            </input>
+            <label htmlFor="upload-file">
+              <UploadIcon/>
+            </label>
+          </div>
         </div>
         <div className="inputContainer">
           <label>Enter Image Title</label>
-
           <input
             name="title"
             onChange={handleChange}
             value={formDetails.title}
             type="text"
-            className="textbox"
+            className={`textbox ${invalidFields.includes('title') ? 'inputWarning' : ''}`}
           ></input>
         </div>
         <div className="inputContainer">
@@ -79,14 +102,14 @@ export function Form({ handleClose, addImage }) {
             onChange={handleChange}
             value={formDetails.description}
             type="text"
-            className="textbox"
+            className={`textbox ${invalidFields.includes('description') ? 'inputWarning' : ''}`}
           ></input>
         </div>
         <div className="inputContainer">
           <label>Enter Image Size</label>
           <Select
             name="size"
-            className="textbox"
+            className={`textbox ${invalidFields.includes('size') ? 'inputWarning' : ''}`}
             id="sizeSelect"
             value={formDetails.size}
             onChange={handleChange}
@@ -100,7 +123,7 @@ export function Form({ handleClose, addImage }) {
           <label>Enter Image Animation</label>
           <Select
             name="animation"
-            className="textbox"
+            className={`textbox ${invalidFields.includes('animation') ? 'inputWarning' : ''}`}
             id="animationSelect"
             value={formDetails.animation}
             onChange={handleChange}
