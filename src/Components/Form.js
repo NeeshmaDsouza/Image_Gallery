@@ -4,13 +4,14 @@ import Select from "@mui/material/Select";
 import { uploadFile } from "../utils/firebase";
 import UploadIcon from '@mui/icons-material/Upload';
 
-export function Form({ handleClose, addImage }) {
+export function Form({ handleClose, addImage, currentImage }) {
   let [formDetails, setFormDetails] = React.useState({
-    imgURL: "",
-    title: "",
-    description: "",
-    size: "",
-    animation: ""
+    id: currentImage?.id,
+    imgURL: currentImage ? currentImage.imgURL : "",
+    title: currentImage ? currentImage.title : "",
+    description: currentImage ? currentImage.description : "",
+    size: currentImage ? currentImage.size : "",
+    animation: currentImage ? currentImage.animation : "",
   });
   const nonMandatoryFields = ['imgURL'];
 
@@ -28,6 +29,9 @@ export function Form({ handleClose, addImage }) {
   async function saveForm() {
     try {
       let invalidFieldList = [];
+      if(imageFile) {
+        formDetails.imgURL = 'temporaryValue';
+      }
       for(let inputField in formDetails) {
         if(formDetails[inputField] == '') {
           invalidFieldList.push(inputField);
@@ -37,10 +41,12 @@ export function Form({ handleClose, addImage }) {
       if(invalidFieldList.length>0) {
         return false;
       }
-      // if(imageFile) {
-      //   const downloadUrl = await uploadFile(`imageFileList/${Date.now()}${imageFile.name}`, imageFile);
-      //   formDetails.imgURL = downloadUrl;
-      // }
+      if(imageFile) {
+        console.log('-------------------------------------')
+        const downloadUrl = await uploadFile(`imageFileList/${Date.now()}${imageFile.name}`, imageFile);
+        console.log("downloadUrl", downloadUrl)
+        formDetails.imgURL = downloadUrl;
+      }
       await addImage(formDetails);
       clearForm();
     } catch(err) {

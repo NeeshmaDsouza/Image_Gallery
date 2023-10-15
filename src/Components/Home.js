@@ -4,12 +4,18 @@ import Box from "@mui/material/Box";
 import { Form } from "./Form";
 import { v4 as uuid } from "uuid";
 import ImageGallery from "./ImageGallery";
-import { addFireStoreDocument, readAllFireStoreDocument } from "../utils/firebase";
+import { 
+  addFireStoreDocument, 
+  readAllFireStoreDocument, 
+  updateFireStoreDocument,
+  deleteFireStoreDocument
+} from "../utils/firebase";
 import { useEffect } from "react";
 
 export function Home() {
   const [open, setOpen] = React.useState(false);
   const [searchPhrase, setSearchPhrase] = React.useState("");
+  const [currentImage, setCurrentImage] = React.useState(null);
   const [imageList, setImageList] = React.useState(
     [
      // /*
@@ -72,7 +78,11 @@ export function Home() {
  );
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setCurrentImage(null);
+  }
+
   const style = {
     position: "absolute",
     top: "50%",
@@ -88,12 +98,37 @@ export function Home() {
 
   async function addImage(newImage) {
     try {
-      // let imageId = await addFireStoreDocument('imageList', newImage);
-      // newImage.id = imageId;
-      newImage.id = uuid();
-      setImageList([...imageList, newImage]);
+      if(newImage.id) {
+        await updateFireStoreDocument('imageList', newImage);
+        setImageList(imageList.map((image) => {
+          if(image.id === newImage.id) {
+            return newImage;
+          }
+          return image;
+        }));
+      } else {
+        delete newImage.id;
+        let imageId = await addFireStoreDocument('imageList', newImage);
+        newImage.id = imageId;
+        // newImage.id = uuid();
+        setImageList([...imageList, newImage]);
+      }
+      setCurrentImage(null);
     } catch (err) {
       console.log('Error in addImage', err);
+    }
+  }
+
+  function handleEdit(imageId) {
+    setCurrentImage(imageList.find((item) => item.id === imageId));
+    handleOpen();
+  }
+
+  async function handleDelete(imageId) {
+    let text = "Are you sure you want to delete this image?";
+    if (confirm(text) == true) {
+      await deleteFireStoreDocument('imageList', imageId);
+      setImageList(imageList.filter((image) => image.id !== imageId));
     }
   }
 
@@ -130,6 +165,8 @@ export function Home() {
         imageList={imageList.filter((image) =>
           image.title.toLowerCase().includes(searchPhrase.toLowerCase())
         )}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
       />
 
       <Modal
@@ -139,7 +176,7 @@ export function Home() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Form handleClose={handleClose} addImage={addImage} />
+          <Form handleClose={handleClose} addImage={addImage} currentImage={currentImage}/>
         </Box>
       </Modal>
     </div>
