@@ -6,70 +6,14 @@ import { v4 as uuid } from "uuid";
 import ImageGallery from "./ImageGallery";
 import { addFireStoreDocument, readAllFireStoreDocument } from "../utils/firebase";
 import { useEffect } from "react";
+import { addObject, clearObjects } from "../utils/indexDB";
+import { listObjects } from "../utils/indexDB";
+import { appConfig } from "../config";
 
 export function Home() {
   const [open, setOpen] = React.useState(false);
   const [searchPhrase, setSearchPhrase] = React.useState("");
-  const [imageList, setImageList] = React.useState(
-    [
-     // /*
-      {
-        id: uuid(),
-        title: "River",
-        description: 'River and Mountaind',
-        animation: 'shake',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/2189700/pexels-photo-2189700.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      },
-      {
-        id: uuid(),
-        title: "Sea",
-        description: 'Ship and Sea',
-        animation: 'fadeIn',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/1295036/pexels-photo-1295036.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      },
-      {
-        id: uuid(),
-        title: "Wheel",
-        description: 'Yellow wheel',
-        animation: 'transform',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/16665616/pexels-photo-16665616/free-photo-of-potted-plants-and-wheels-in-a-store.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      },
-      {
-        id: uuid(),
-        title: "Plant",
-        description: 'Green Plant iun a White pot',
-        animation: 'colourize',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/1777813/pexels-photo-1777813.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2https://images.pexels.com/photos/1777813/pexels-photo-1777813.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2https://images.pexels.com/photos/1777813/pexels-photo-1777813.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      },
-      {
-        id: uuid(),
-        title: "Grass",
-        description: 'Green and wet grass',
-        animation: 'shake',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/1089450/pexels-photo-1089450.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      },
-      {
-        id: uuid(),
-        title: "Decor",
-        description: 'Modern Decor',
-        animation: 'transform',
-        size: "sm",
-        imgURL:
-          "https://images.pexels.com/photos/4558718/pexels-photo-4558718.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-      }
-      //*/
-    ]
- );
+  const [imageList, setImageList] = React.useState([]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -88,11 +32,14 @@ export function Home() {
 
   async function addImage(newImage) {
     try {
-      // let imageId = await addFireStoreDocument('imageList', newImage);
-      // newImage.id = imageId;
-      newImage.id = uuid();
+      let imageId = await addFireStoreDocument('imageList', newImage);
+      newImage.id = imageId;
+      await addObject(newImage, 'imageList')
       setImageList([...imageList, newImage]);
     } catch (err) {
+      newImage.id = uuid();
+      await addObject(newImage, 'imageList')
+      setImageList([...imageList, newImage]);
       console.log('Error in addImage', err);
     }
   }
@@ -103,10 +50,29 @@ export function Home() {
 
   useEffect(() => {
     readAllFireStoreDocument('imageList')
-    .then((response) => {
-      setImageList(response)
+    .then(async (imageList) => {
+      const initialImages = appConfig.initialImages
+      if(imageList.length === 0) {
+        await Promise.all(initialImages.map(image => {
+          return addFireStoreDocument('imageList', image)
+          .then(() => addObject(image, 'imageList'))
+        }))
+        setImageList(initialImages)
+      } else {
+        await clearObjects('imageList')
+        await Promise.all(imageList.map(image => {
+          return addObject(image, 'imageList')
+        }))
+        setImageList(imageList)
+      }
     })
-    .catch((err) => {
+    .catch(async (err) => {
+      const imageList = await listObjects('imageList')
+      await clearObjects('imageList')
+      await Promise.all(initialImages.map(image => {
+        return addObject(image, 'imageList')
+      }))
+      setImageList(imageList)
       console.log('Error in reading data', err)
     })
   }, []);
