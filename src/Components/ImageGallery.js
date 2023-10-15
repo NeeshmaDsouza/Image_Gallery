@@ -1,9 +1,12 @@
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import { useEffect, useMemo, useState } from "react";
 const SMALL_SCREEN_COLUMNS = 2;
 const AVERAGE_SCREEN_COLUMNS = 3;
 const LARGE_SCREEN_COLUMNS = 5;
 
-const GalleryItem = ({ imgURL, title, description, size, animation }) => {
+const GalleryItem = ({ imgURL, title, description, size, animation, id, handleEdit, handleDelete }) => {
 
   function MouseOver(event) {
     if(animation == 'transform') {
@@ -27,21 +30,35 @@ const GalleryItem = ({ imgURL, title, description, size, animation }) => {
     }
   }
   return (
-    <div className="gallery-item" 
-    >
+    <div className="gallery-item" >
       <img className={`gallery-image ${size}`} src={imgURL} alt={title} 
-      onMouseOver={MouseOver}
-      onMouseOut={MouseOut}
+        onMouseOver={MouseOver}
+        onMouseOut={MouseOut}
       />
-      <div class="imageContent">
-        <h3>{title}</h3>
-        <p>{description}</p>
+      <div>
+        <div className='actionBtn'>
+          <EditIcon fontSize='small' 
+            onClick={() => {
+              handleEdit(id);
+            }}
+            />
+          <DeleteIcon fontSize='small'
+            onClick={() => {
+              handleDelete(id);
+            }}
+          />
+        </div>
+        <div class="imageContent">
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
       </div>
+      
     </div>
   );
 };
 
-const ImageGallery = ({ imageList }) => {
+const ImageGallery = ({ imageList, handleEdit, handleDelete}) => {
   const [screenWidth, setScreenwidth] = useState(window.innerWidth);
 
   const resolveScreenWidth = (screenWidth, imageList) => {
@@ -93,7 +110,10 @@ const ImageGallery = ({ imageList }) => {
       {columnGroups.map((column) => (
         <div className="column">
           {column.map((image) => (
-            <GalleryItem key={image.id} {...image} />
+            <GalleryItem key={image.id} {...image} 
+              handleEdit={handleEdit} 
+              handleDelete={handleDelete} 
+            />
           ))}
         </div>
       ))}
