@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { collection, getDocs, addDoc } from "firebase/firestore"; 
+import { collection, getDocs, addDoc, doc, getFirestore, updateDoc, deleteDoc} from "firebase/firestore"; 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
@@ -26,11 +25,33 @@ const storage = getStorage(app);
 
 export const addFireStoreDocument = async (collectionName, newDocument) => {
     try {
+        console.log("newDocument", newDocument)
         const docRef = await addDoc(collection(db, collectionName), newDocument);
         console.log("Document written with ID: ", docRef.id);
         return docRef.id;
     } catch (e) {
         console.error("Error adding document: ", e);
+        throw e;
+    }
+}
+export const updateFireStoreDocument = async (collectionName, document) => {
+    try {
+        const docRef = doc(db, collectionName, document.id);
+        await updateDoc(docRef, document);
+        console.log("Document updated ", docRef.id);
+    } catch (e) {
+        console.error("Error in updating document: ", e);
+        throw e;
+    }
+}
+
+export const deleteFireStoreDocument = async (collectionName, documentId) => {
+    try {
+        const docRef = doc(db, collectionName, documentId);
+        await deleteDoc(docRef);
+        console.log("Document deleted ", docRef.id);
+    } catch (e) {
+        console.error("Error in deleting document: ", e);
         throw e;
     }
 }
