@@ -1,7 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const GalleryItem = ({ imgURL, title, description, size, animation }) => {
+const GalleryItem = ({ imgURL, title, description, size, animation, handleEdit, handleDelete, id }) => {
 
   function MouseOver(event) {
     if(animation == 'transform') {
@@ -53,11 +53,11 @@ const GalleryItem = ({ imgURL, title, description, size, animation }) => {
   );
 };
 
-const ImageGallery = ({ imageList }) => {
+const ImageGallery = ({ imageList, handleEdit, handleDelete }) => {
   return (
     <div className="imageContainer">
       {imageList.map((image) => (
-        <GalleryItem key={image.id} {...image} />
+        <GalleryItem key={image.id} {...image} handleEdit={handleEdit} handleDelete={handleDelete} />
       ))}
     </div>
   );
