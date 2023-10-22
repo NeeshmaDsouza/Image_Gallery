@@ -4,6 +4,7 @@ import Select from "@mui/material/Select";
 import { uploadFile } from "../utils/firebase";
 import UploadIcon from '@mui/icons-material/Upload';
 
+/* TODO: Better name for the function */
 export function Form({ handleClose, addImage, currentImage }) {
   let [formDetails, setFormDetails] = React.useState({
     id: currentImage?.id,
@@ -152,3 +153,5 @@ export function Form({ handleClose, addImage, currentImage }) {
     </>
   );
 }
+
+/* TODO: Proptypes used in each component to document correct propery data types */

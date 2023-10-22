@@ -1,12 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { useEffect, useMemo, useState } from "react";
-const SMALL_SCREEN_COLUMNS = 2;
-const AVERAGE_SCREEN_COLUMNS = 3;
-const LARGE_SCREEN_COLUMNS = 5;
-
-const GalleryItem = ({ imgURL, title, description, size, animation, id, handleEdit, handleDelete }) => {
+const GalleryItem = ({ imgURL, title, description, size, animation, handleEdit, handleDelete, id }) => {
 
   function MouseOver(event) {
     if(animation == 'transform') {
@@ -58,64 +53,11 @@ const GalleryItem = ({ imgURL, title, description, size, animation, id, handleEd
   );
 };
 
-const ImageGallery = ({ imageList, handleEdit, handleDelete}) => {
-  const [screenWidth, setScreenwidth] = useState(window.innerWidth);
-
-  const resolveScreenWidth = (screenWidth, imageList) => {
-    const columnList = [];
-    let columnCount = SMALL_SCREEN_COLUMNS;
-    if (screenWidth < 560) {
-      columnCount = SMALL_SCREEN_COLUMNS;
-    } else if (screenWidth < 1400) {
-      columnCount = AVERAGE_SCREEN_COLUMNS;
-    } else {
-      columnCount = LARGE_SCREEN_COLUMNS;
-    }
-    imageList.forEach((image, index) => {
-      for (let columnNumber = 0; columnNumber < columnCount; ++columnNumber) {
-        if (index % columnCount === columnNumber) {
-          if (columnList.length === columnNumber) {
-            columnList.push([image]);
-          } else {
-            columnList[columnNumber].push(image);
-          }
-        }
-      }
-    });
-
-    return columnList;
-  };
-
-  const columnGroups = useMemo(
-    () => resolveScreenWidth(screenWidth, imageList),
-    [screenWidth, imageList]
-  );
-
-  const updateColumnConfig = (event) => {
-    setScreenwidth(window.innerWidth);
-  };
-
-  useEffect(() => {
-    window
-      .matchMedia("(max-width: 560px)")
-      .addEventListener("change", updateColumnConfig);
-    return () => {
-      window
-        .matchMedia("(max-width: 560px)")
-        .removeEventListener("change", updateColumnConfig);
-    };
-  }, []);
+const ImageGallery = ({ imageList, handleEdit, handleDelete }) => {
   return (
-    <div className="disp-flex imageContainer">
-      {columnGroups.map((column) => (
-        <div className="column">
-          {column.map((image) => (
-            <GalleryItem key={image.id} {...image} 
-              handleEdit={handleEdit} 
-              handleDelete={handleDelete} 
-            />
-          ))}
-        </div>
+    <div className="imageContainer">
+      {imageList.map((image) => (
+        <GalleryItem key={image.id} {...image} handleEdit={handleEdit} handleDelete={handleDelete} />
       ))}
     </div>
   );
