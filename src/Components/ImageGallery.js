@@ -6,7 +6,7 @@ const SMALL_SCREEN_COLUMNS = 2;
 const AVERAGE_SCREEN_COLUMNS = 3;
 const LARGE_SCREEN_COLUMNS = 5;
 
-const GalleryItem = ({ imgURL, title, description, size, animation, id, handleEdit, handleDelete }) => {
+export const GalleryItem = ({ imgURL, title, description, size, animation, id, handleEdit, handleDelete }) => {
 
   function MouseOver(event) {
     if(animation == 'transform') {
